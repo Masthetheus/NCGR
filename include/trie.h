@@ -8,6 +8,7 @@ typedef struct TrieNode {
         uint8_t base;
         uint32_t x, y;
         uint8_t depth;
+        uint32_t subtree_count;
 } TrieNode;
 
 

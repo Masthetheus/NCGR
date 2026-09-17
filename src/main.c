@@ -6,10 +6,11 @@
 #include "file_parser.h"
 #include "trie.h"
 #include "trie_operations.h"
+#include "export.h"
 
 int main(int argc, char *argv[]){
-        if (argc != 2){
-                fprintf(stderr, "Usage: %s <nullomer_file>\n", argv[0]);
+        if (argc != 3){
+                fprintf(stderr, "Usage: %s <nullomer_file> <out_file>\n", argv[0]);
                 return 1;
         }
 
@@ -18,6 +19,8 @@ int main(int argc, char *argv[]){
                 perror("Error opening file!");
                 return 1;
         }
+
+        char *out = argv[2];
 
         // gather null set from file
         int k = 0;
@@ -32,5 +35,8 @@ int main(int argc, char *argv[]){
         }
         free(nullomers);
 
+        compute_subtree_count(root);
+        export_trie(root, k, out);
         root = free_helper(root, k);
+        return 0;
 }

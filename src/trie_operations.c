@@ -4,9 +4,15 @@
 
 #include "trie.h"
 
+static const uint8_t corner_x[4] = {0, 0, 1, 1};
+static const uint8_t corner_y[4] = {0, 1, 0, 1};
+
 TrieNode *createNode() {
         TrieNode *node = (TrieNode *)malloc(sizeof(TrieNode));
         node->depth = 0;
+        node->x = 0;
+        node->y = 0;
+        node->subtree_count = 0;
         for (int i = 0; i < 4; i++) {
                 node->child[i] = NULL;
         }
@@ -20,9 +26,23 @@ void insert(TrieNode *root, uint64_t idx, int k){
                 if (current->child[base] == NULL) {
                         current->child[base] = createNode();
                         current->child[base]->depth = i + 1;
+                        current->child[base]->base = base;
+                        current->child[base]->x = (current->x << 1) | corner_x[base];
+                        current->child[base]->y = (current->y << 1) | corner_y[base];
                 }
                 current = current->child[base];
         }
+}
+
+uint32_t compute_subtree_count(TrieNode *node){
+        if (node == NULL) return 0;
+
+        uint32_t total = 0;
+        for (int i = 0; i < 4; i++){
+                total += compute_subtree_count(node->child[i]);
+        }
+        node->subtree_count = total;
+        return total;
 }
 
 TrieNode *free_helper(TrieNode *root, int k){
@@ -38,3 +58,4 @@ TrieNode *free_helper(TrieNode *root, int k){
         free(root);
         return NULL;
 }
+
