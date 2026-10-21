@@ -12,44 +12,40 @@ static const uint8_t encoding[256] = {
 };
 
 TrieNode *createNode() {
-        TrieNode *node = (TrieNode *)malloc(sizeof(TrieNode));
-        node->depth = 0;
-        node->x = 0;
-        node->y = 0;
-        node->subtree_count = 0;
-        for (int i = 0; i < 4; i++) {
-                node->child[i] = NULL;
-        }
+        TrieNode *node = (TrieNode *)calloc(1, sizeof(TrieNode));  // zera is_maw, base, x, y, filhos
+        if (!node) { perror("calloc"); exit(1); }
         return node;
 }
 
 void insert(TrieNode *root, char *seq, int *k){
         TrieNode *current = root;
         size_t len = strlen(seq);
-        if (len > 0 && seq[len-1] == '\n') {
-                        seq[--len] = '\0';
-                }
+        while (len > 0 && (seq[len-1] == '\n' || seq[len-1] == '\r')) {
+                seq[--len] = '\0';
+        }
+        if (len == 0) return;
+
         for (size_t i = 0; i < len; i++){
                 uint8_t base = encoding[(unsigned char) seq[i]];
                 if (current->child[base] == NULL) {
-                        current->child[base] = createNode();
-                        current->child[base]->depth = i + 1;
-                        current->child[base]->base = base;
-                        current->child[base]->x = (current->x << 1) | corner_x[base];
-                        current->child[base]->y = (current->y << 1) | corner_y[base];
+                        TrieNode *n = createNode();
+                        n->depth = i + 1;
+                        n->base  = base;
+                        // base nova entra no bit MAIS ALTO (posicao i); primeira base fica no bit 0
+                        n->x = current->x | ((uint32_t)corner_x[base] << i);
+                        n->y = current->y | ((uint32_t)corner_y[base] << i);
+                        current->child[base] = n;
                 }
                 current = current->child[base];
         }
         current->is_maw = 1;
-        if ((current->is_maw) = 1 && (current->depth) > *k){
-                *k = (current->depth);
-        }
+        if (current->depth > *k) *k = current->depth;
 }
 
 uint32_t compute_subtree_count(TrieNode *node){
         if (node == NULL) return 0;
 
-        uint32_t total = 0;
+        uint32_t total = node->is_maw ? 1 : 0;   // o proprio no conta
         for (int i = 0; i < 4; i++){
                 total += compute_subtree_count(node->child[i]);
         }

@@ -4,7 +4,8 @@
 static void export_traverse(TrieNode *node, FILE *f, uint32_t *node_count){
         if (node == NULL) return;
 
-        ExportRecord rec = { node->x, node->y, node->depth, node->subtree_count };
+        ExportRecord rec = { node->x, node->y, node->subtree_count,
+                     (uint8_t)node->depth, (uint8_t)node->is_maw };
         fwrite(&rec, sizeof(ExportRecord), 1, f);
         (*node_count)++;
 
